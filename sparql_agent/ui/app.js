@@ -73,12 +73,96 @@
     return html.replace(/@@CODE(\d+)@@/g, (_, index) => code[Number(index)]);
   }
 
+  const IRI_PATTERN = /[A-Za-z][A-Za-z0-9+.-]*:(?:\/\/)?[^\s<>"'`]+/gu;
+
+  function trimIri(value) {
+    let iri = value.replace(/[.,;:!?]+$/u, "");
+    const pairs = [["(", ")"], ["[", "]"], ["{", "}"]];
+    for (const [open, close] of pairs) {
+      while (iri.endsWith(close) && iri.split(close).length > iri.split(open).length) iri = iri.slice(0, -1);
+    }
+    return iri;
+  }
+
+  function prepareIriFollowUp(iri) {
+    toggleChat(true);
+    const reference = `<${iri}>`;
+    let cursor;
+    if (!input.value.trim()) {
+      input.value = `Tell me more about ${reference}.`;
+      cursor = input.value.length;
+    } else {
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      const before = input.value.slice(0, start);
+      const after = input.value.slice(end);
+      const insertion = `${before && !/\s$/.test(before) ? " " : ""}${reference}${after && !/^\s/.test(after) ? " " : ""}`;
+      input.value = `${before}${insertion}${after}`;
+      cursor = before.length + insertion.length;
+    }
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+    input.setSelectionRange(cursor, cursor);
+  }
+
+  function iriFollowUpButton(iri) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "iri-follow-up";
+    button.dataset.iri = iri;
+    button.textContent = "+";
+    button.title = `Ask a follow-up about ${iri}`;
+    button.setAttribute("aria-label", `Ask a follow-up about ${iri}`);
+    button.addEventListener("click", () => prepareIriFollowUp(iri));
+    return button;
+  }
+
+  function decorateIris(bubble) {
+    // Markdown links need a button too, but their text must not be processed a
+    // second time by the text-node pass below.
+    for (const anchor of bubble.querySelectorAll("a")) {
+      const target = anchor.getAttribute("href") || "";
+      const label = anchor.textContent.trim();
+      const match = (target.match(new RegExp(`^${IRI_PATTERN.source}$`, "u")) || label.match(new RegExp(`^${IRI_PATTERN.source}$`, "u")))?.[0];
+      const iri = match && trimIri(match);
+      if (iri) anchor.after(iriFollowUpButton(iri));
+    }
+
+    const walker = document.createTreeWalker(bubble, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        return node.parentElement.closest("a, button") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    for (const node of textNodes) {
+      const source = node.nodeValue;
+      const matches = [...source.matchAll(IRI_PATTERN)];
+      if (!matches.length) continue;
+      const fragment = document.createDocumentFragment();
+      let offset = 0;
+      for (const match of matches) {
+        const iri = trimIri(match[0]);
+        if (!iri) continue;
+        fragment.append(source.slice(offset, match.index), iri, iriFollowUpButton(iri));
+        offset = match.index + iri.length;
+      }
+      fragment.append(source.slice(offset));
+      node.replaceWith(fragment);
+    }
+  }
+
+  function renderBubble(bubble, text) {
+    bubble.innerHTML = markdown(text);
+    decorateIris(bubble);
+  }
+
   function addMessage(role, text = "", extraClass = "") {
     const row = document.createElement("div");
     row.className = `message ${role} ${extraClass}`;
     const bubble = document.createElement("div");
     bubble.className = "bubble markdown";
-    bubble.innerHTML = markdown(text);
+    renderBubble(bubble, text);
     row.appendChild(bubble);
     messages.appendChild(row);
     messages.scrollTop = messages.scrollHeight;
@@ -320,16 +404,16 @@
         if (chunk) {
           if (event.partial === false && answer && chunk.startsWith(answer)) answer = chunk;
           else answer += chunk;
-          assistant.bubble.innerHTML = markdown(answer);
+          renderBubble(assistant.bubble, answer);
           messages.scrollTop = messages.scrollHeight;
         }
       });
       if (!answer) answer = "No text response was returned.";
-      assistant.bubble.innerHTML = markdown(answer);
+      renderBubble(assistant.bubble, answer);
       await attachNewArtifacts(assistant.row);
     } catch (error) {
       assistant.row.classList.add("error");
-      assistant.bubble.innerHTML = markdown(`**Chat error:** ${error.message}`);
+      renderBubble(assistant.bubble, `**Chat error:** ${error.message}`);
     } finally {
       assistant.bubble.classList.remove("typing"); sendButton.disabled = false; input.disabled = false; input.focus();
     }
