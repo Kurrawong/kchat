@@ -17,7 +17,10 @@
       </svg>
       <span>kchat</span>
     </a>
-    <span class="tagline">Read-only SPARQL assistant</span>
+    <div class="header-meta">
+      <span class="tagline">Read-only SPARQL assistant</span>
+      <a class="repo-link" href="https://github.com/Kurrawong/kchat" target="_blank" rel="noopener">GitHub repository ↗</a>
+    </div>
   </header>
 
   <main>
@@ -25,7 +28,11 @@
       <p class="eyebrow">RDF QUERY ASSISTANT</p>
       <h1>Query the connected graph using natural language</h1>
       <p class="lead">kchat inspects the graph schema, generates read-only SPARQL, and summarizes the returned data. Each successful query includes the exact SPARQL and complete JSON or Turtle result for review.</p>
-      <button class="primary" id="hero-chat">Open query chat</button>
+      <p class="project-note">kchat is open-source software maintained by <a href="https://kurrawong.ai/" target="_blank" rel="noopener">KurrawongAI</a>. Read the <a href="https://github.com/Kurrawong/kchat#readme" target="_blank" rel="noopener">documentation</a>, report an <a href="https://github.com/Kurrawong/kchat/issues" target="_blank" rel="noopener">issue</a>, or contribute on GitHub.</p>
+      <div class="hero-actions">
+        <button class="primary" id="hero-chat">Open query chat</button>
+        <a class="secondary" href="https://github.com/Kurrawong/kchat" target="_blank" rel="noopener">View source</a>
+      </div>
     </section>
 
     <section class="grid" aria-label="How kchat operates">
@@ -42,13 +49,22 @@
   -v "$PWD/rdf:/rdf:ro" \
   -e SPARQL_ENDPOINT=/rdf \
   -e LLM_API_KEY="$MISTRAL_API_KEY" \
-  kchat:dev</code></pre>
+  ghcr.io/kurrawong/kchat:latest</code></pre>
         <h3>Remote endpoint</h3>
         <pre><code>SPARQL_ENDPOINT=https://data.example/sparql
 SPARQL_BEARER_TOKEN=••••••••
 LLM_MODEL=mistral/mistral-small-latest</code></pre>
       </div>
     </section>
+
+    <footer class="site-footer">
+      <span>kchat · open-source natural-language access to RDF graphs</span>
+      <nav aria-label="Project links">
+        <a href="https://github.com/Kurrawong/kchat" target="_blank" rel="noopener">Repository</a>
+        <a href="https://github.com/Kurrawong/kchat#run-the-demo" target="_blank" rel="noopener">Run locally</a>
+        <a href="https://github.com/Kurrawong/kchat/blob/main/environment.example" target="_blank" rel="noopener">Configuration</a>
+      </nav>
+    </footer>
   </main>
 
   <button id="chat-launcher" aria-label="Open chat">

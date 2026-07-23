@@ -3,6 +3,8 @@ LLM_MODEL=mistral/mistral-small-latest
 LLM_API_KEY=
 # Optional override when the model is not known to LiteLLM; used by the UI context meter.
 LLM_CONTEXT_WINDOW_TOKENS=
+# Use LiteLLM's bundled cost/context map instead of fetching it at startup.
+LITELLM_LOCAL_MODEL_COST_MAP=true
 
 # Omit to use the image's /demo RDF. Set an absolute mounted directory or URL.
 SPARQL_ENDPOINT=/rdf

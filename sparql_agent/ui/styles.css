@@ -47,12 +47,20 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monos
 }
 .brand-mark { width: 39px; height: 39px; color: var(--ink); }
 .brand-mark circle { fill: var(--yellow); }
+.header-meta { display: flex; align-items: center; gap: 20px; }
 .tagline {
   font: 12px ui-monospace, SFMono-Regular, monospace;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1.6px;
 }
+.repo-link, .project-note a, .site-footer a {
+  color: #713f12;
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+.repo-link { font-size: 12px; }
+.repo-link:hover, .project-note a:hover, .site-footer a:hover { color: var(--ink); }
 
 main { max-width: 1040px; margin: auto; padding: 0 30px 72px; }
 .hero { padding: 58px 0 52px; max-width: 760px; }
@@ -64,8 +72,9 @@ main { max-width: 1040px; margin: auto; padding: 0 30px 72px; }
 }
 h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px; margin: 14px 0 20px; }
 .lead { font-size: 17px; line-height: 1.6; max-width: 720px; color: #52525b; }
+.project-note { max-width: 680px; color: var(--muted); }
+.hero-actions { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
 .primary {
-  margin-top: 18px;
   border: 1px solid var(--ink);
   background: var(--ink);
   color: white;
@@ -75,6 +84,8 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
   cursor: pointer;
 }
 .primary:hover { background: #3f3f46; }
+.secondary { color: var(--ink); font-weight: 650; text-underline-offset: 4px; }
+.secondary:hover { color: #854d0e; }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-top: 3px solid var(--yellow); border-radius: 6px; }
 .grid article { padding: 25px 24px 28px; }
@@ -88,6 +99,16 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
 .code-tabs h3 { font: 700 12px ui-monospace, monospace; color: var(--yellow); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 9px; }
 .code-tabs h3:not(:first-child) { margin-top: 25px; }
 .code-tabs pre { margin: 0; white-space: pre-wrap; color: #d4d4d8; font-size: 12px; line-height: 1.65; }
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+.site-footer nav { display: flex; flex-wrap: wrap; gap: 16px; }
 
 #chat-launcher {
   position: fixed;
@@ -265,6 +286,8 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
 
 @media (max-width: 760px) {
   .tagline { display: none; }
+  .header-meta { gap: 0; }
+  .site-footer { flex-direction: column; }
   .hero { padding-top: 45px; }
   h1 { letter-spacing: -1.5px; }
   .grid, .config { grid-template-columns: 1fr; }
