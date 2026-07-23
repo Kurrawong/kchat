@@ -45,8 +45,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monos
   text-decoration: none;
   letter-spacing: -1px;
 }
-.brand-mark { width: 39px; height: 39px; color: var(--ink); }
-.brand-mark circle { fill: var(--yellow); }
+.brand-mark { width: 43px; height: 43px; object-fit: contain; }
 .header-meta { display: flex; align-items: center; gap: 20px; }
 .tagline {
   font: 12px ui-monospace, SFMono-Regular, monospace;
@@ -161,14 +160,15 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
 .mini-logo {
   display: grid;
   place-items: center;
-  width: 35px;
-  height: 35px;
+  width: 39px;
+  height: 39px;
   margin-right: 11px;
-  background: var(--yellow);
-  color: var(--yellow-ink);
+  padding: 2px;
+  background: white;
+  border: 2px solid var(--yellow);
   border-radius: 7px 7px 7px 2px;
-  font: 900 22px Candara, Arial, sans-serif;
 }
+.mini-logo img { width: 100%; height: 100%; object-fit: contain; }
 .chat-header strong { display: block; font-family: Candara, Arial, sans-serif; font-size: 16px; }
 .chat-header small { display: block; color: #d4d4d8; font-size: 11px; }
 .chat-header small i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--yellow); margin-right: 5px; }
