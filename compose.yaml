@@ -1,0 +1,46 @@
+services:
+  kchat:
+    build:
+      context: .
+    image: kchat:dev
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      LLM_MODEL: "${LLM_MODEL:-mistral/mistral-small-latest}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      LLM_CONTEXT_WINDOW_TOKENS: "${LLM_CONTEXT_WINDOW_TOKENS:-}"
+      SYSTEM_PROMPT: "${SYSTEM_PROMPT:-}"
+      SPARQL_ENDPOINT: "${SPARQL_ENDPOINT:-/demo}"
+      SPARQL_USERNAME: "${SPARQL_USERNAME:-}"
+      SPARQL_PASSWORD: "${SPARQL_PASSWORD:-}"
+      SPARQL_BEARER_TOKEN: "${SPARQL_BEARER_TOKEN:-}"
+      SPARQL_TIMEOUT_SECONDS: "${SPARQL_TIMEOUT_SECONDS:-30}"
+      SPARQL_MAX_RESPONSE_BYTES: "${SPARQL_MAX_RESPONSE_BYTES:-10485760}"
+      SPARQL_PREVIEW_ITEMS: "${SPARQL_PREVIEW_ITEMS:-20}"
+      AGENTS_DIR: /app
+      ADK_RELOAD_AGENTS: "true"
+    command:
+      - uvicorn
+      - sparql_agent.web:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - /app/sparql_agent
+    develop:
+      watch:
+        - action: sync
+          path: ./sparql_agent
+          target: /app/sparql_agent
+          ignore:
+            - __pycache__/
+            - "*.pyc"
+        - action: sync+restart
+          path: ./demo
+          target: /demo
+        - action: rebuild
+          path: ./pyproject.toml
+        - action: rebuild
+          path: ./Dockerfile

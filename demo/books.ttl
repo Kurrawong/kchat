@@ -1,0 +1,16 @@
+@prefix ex: <https://example.org/> .
+@prefix schema: <https://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:book-1 a schema:Book ;
+  schema:name "The Left Hand of Darkness" ;
+  schema:author ex:ursula ;
+  schema:datePublished "1969"^^xsd:gYear .
+
+ex:book-2 a schema:Book ;
+  schema:name "A Wizard of Earthsea" ;
+  schema:author ex:ursula ;
+  schema:datePublished "1968"^^xsd:gYear .
+
+ex:ursula a schema:Person ;
+  schema:name "Ursula K. Le Guin" .

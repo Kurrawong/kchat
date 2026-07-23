@@ -1,0 +1,1 @@
+"""SPARQL MCP server package."""
