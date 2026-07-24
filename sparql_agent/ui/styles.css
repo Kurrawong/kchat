@@ -236,6 +236,24 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
 .bubble code { background: var(--yellow-soft); color: var(--yellow-ink); padding: 1px 3px; border-radius: 3px; font-size: .92em; }
 .bubble pre code, .user .bubble code { background: transparent; color: inherit; }
 .bubble a { color: #854d0e; }
+.iri-follow-up {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  margin: 0 2px;
+  padding: 0;
+  border: 1px solid #ca8a04;
+  border-radius: 50%;
+  background: var(--yellow-soft);
+  color: var(--yellow-ink);
+  font: 700 13px/1 ui-monospace, monospace;
+  vertical-align: text-bottom;
+  cursor: pointer;
+}
+.iri-follow-up:hover, .iri-follow-up:focus-visible { background: var(--yellow); outline: 1px solid var(--ink); outline-offset: 1px; }
+.user .iri-follow-up { border-color: var(--yellow); background: transparent; color: var(--yellow); }
+.user .iri-follow-up:hover, .user .iri-follow-up:focus-visible { background: var(--yellow); color: var(--ink); }
 .typing:after { content: ""; display: inline-block; width: 5px; height: 12px; background: var(--yellow); animation: blink .8s infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .artifact-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line); }
