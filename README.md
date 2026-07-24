@@ -11,6 +11,16 @@ The agent uses two focused tools:
 
 Every generated query and its complete result are saved as downloadable artifacts, while the chat response gives a readable summary. If a query fails or returns nothing, the agent can inspect the feedback and try one correction.
 
+## Screenshots
+
+### Ask questions in natural language
+
+![kchat answering a natural-language question about an RDF graph](docs/images/kchat-query.png)
+
+### Inspect the generated SPARQL
+
+![kchat's artifact viewer showing the generated SPARQL query](docs/images/kchat-artifact.png)
+
 ## How it fits into an application
 
 kchat is a standalone backend service with an optional interface. The service manages conversations, runs the SPARQL agent, streams responses, and stores the generated queries and results. Applications communicate with it over HTTP, so they do not need to include the agent code or connect to its internal tools.
@@ -55,16 +65,6 @@ The only other web integration is serving the bundled static interface at `/`. A
 - **Local RDF:** RDFLib for parsing and Oxigraph for the in-memory graph store.
 - **Demo interface:** plain HTML, CSS, and JavaScript with no frontend framework.
 - **Deployment:** a single Docker image; uv and Docker Compose are included in the development workflow.
-
-## Screenshots
-
-### Ask questions in natural language
-
-![kchat answering a natural-language question about an RDF graph](docs/images/kchat-query.png)
-
-### Inspect the generated SPARQL
-
-![kchat's artifact viewer showing the generated SPARQL query](docs/images/kchat-artifact.png)
 
 ## Run the demo
 
