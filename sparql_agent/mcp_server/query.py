@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from pyoxigraph import QueryResultsFormat, QuerySolutions, QueryTriples, RdfFormat, Store
+from pyoxigraph import QueryBoolean, QueryResultsFormat, QuerySolutions, QueryTriples, RdfFormat, Store
 from pyparsing import ParseBaseException, ParseResults
 from rdflib import Dataset, Graph
 from rdflib.plugins.sparql.parser import parseQuery
@@ -118,8 +118,8 @@ class QueryService:
         store = await self._get_store()
         def run() -> bytes:
             result = store.query(query, use_default_graph_as_union=True)
-            if isinstance(result, bool):
-                return json.dumps({"head": {}, "boolean": result}).encode()
+            if isinstance(result, (bool, QueryBoolean)):
+                return json.dumps({"head": {}, "boolean": bool(result)}).encode()
             if isinstance(result, QuerySolutions):
                 return bytes(result.serialize(format=QueryResultsFormat.JSON))
             if isinstance(result, QueryTriples):

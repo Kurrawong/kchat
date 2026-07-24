@@ -8,6 +8,8 @@ import json
 from typing import Any
 from urllib.parse import urlsplit
 
+from rdflib import Literal
+
 from sparql_agent.mcp_server.query import QueryService
 
 PREFIXES = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -15,6 +17,16 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX schema: <https://schema.org/>
 """
+
+LABEL_PREDICATES = " ".join(
+    f"<{iri}>"
+    for iri in (
+        "http://www.w3.org/2000/01/rdf-schema#label",
+        "http://www.w3.org/2004/02/skos/core#prefLabel",
+        "https://schema.org/name",
+        "http://schema.org/name",
+    )
+)
 
 SCHEMA_QUERIES = {
     "classes": PREFIXES + """SELECT ?class (SAMPLE(?candidateLabel) AS ?label) (COUNT(DISTINCT ?instance) AS ?count)
@@ -72,3 +84,44 @@ class SchemaService:
                     rows = {name: _rows(await self.query_service.execute(query)) for name, query in SCHEMA_QUERIES.items()}
                     self._cache = assemble_schema(rows)
         return self._cache
+
+    async def search(self, text: str, limit: int = 8) -> dict[str, Any]:
+        """Find observed entity and predicate IRIs from a user-provided label fragment."""
+        text = text.strip()
+        if not text:
+            raise ValueError("Search text must not be empty")
+        limit = max(1, min(limit, 20))
+        needle = Literal(text[:200]).n3()
+        entities_query = f"""SELECT DISTINCT ?resource ?label ?type WHERE {{
+  VALUES ?labelPredicate {{ {LABEL_PREDICATES} }}
+  ?resource ?labelPredicate ?label .
+  FILTER(ISLITERAL(?label) && CONTAINS(LCASE(STR(?label)), LCASE({needle})))
+  OPTIONAL {{ ?resource a ?type }}
+}} ORDER BY LCASE(STR(?label)) ?resource LIMIT {limit}"""
+        predicates_query = f"""SELECT ?predicate (SAMPLE(?candidateLabel) AS ?label) WHERE {{
+  ?subject ?predicate ?object .
+  OPTIONAL {{
+    VALUES ?labelPredicate {{ {LABEL_PREDICATES} }}
+    ?predicate ?labelPredicate ?candidateLabel .
+  }}
+  FILTER(CONTAINS(LCASE(STR(?predicate)), LCASE({needle})) ||
+         (BOUND(?candidateLabel) && CONTAINS(LCASE(STR(?candidateLabel)), LCASE({needle}))))
+}} GROUP BY ?predicate ORDER BY ?predicate LIMIT {limit}"""
+        entity_envelope, predicate_envelope = await asyncio.gather(
+            self.query_service.execute(entities_query),
+            self.query_service.execute(predicates_query),
+        )
+        entities = [
+            {"iri": row["resource"], "label": row.get("label") or _short(row["resource"]), "type": row.get("type") or None}
+            for row in _rows(entity_envelope)
+        ]
+        predicates = [
+            {"iri": row["predicate"], "label": row.get("label") or _short(row["predicate"])}
+            for row in _rows(predicate_envelope)
+        ]
+        return {
+            "description": "Observed candidates only. Verify ambiguous matches against the question before querying.",
+            "search": text,
+            "entities": entities,
+            "predicates": predicates,
+        }

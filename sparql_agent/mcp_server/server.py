@@ -16,11 +16,11 @@ def create_server(settings: Settings | None = None) -> FastMCP:
     schemas = SchemaService(queries)
     server = FastMCP("Generic read-only SPARQL", instructions="Inspect the observed graph with schema, then query it with read-only SPARQL.")
 
-    @server.tool(name="schema", description="Return a cached, concise description of observed RDF classes, predicates, datatypes, counts, and class-to-class connections.")
-    async def schema_tool() -> dict[str, Any]:
+    @server.tool(name="schema", description="Inspect the observed RDF graph. With no search text, return cached classes, predicates, datatypes, counts, and connections. With search text, link an entity or relation label to observed IRI candidates.")
+    async def schema_tool(search: str | None = None, limit: int = 8) -> dict[str, Any]:
         try:
-            return await schemas.get_schema()
-        except SparqlError as error:
+            return await schemas.search(search, limit) if search is not None else await schemas.get_schema()
+        except (SparqlError, ValueError) as error:
             raise ToolError(f"Could not inspect graph schema: {error}") from error
 
     @server.tool(name="sparql", description="Execute one read-only SELECT, ASK, CONSTRUCT, or DESCRIBE query. SPARQL Update and SERVICE are rejected.")

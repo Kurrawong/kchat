@@ -2,10 +2,10 @@
 
 A single container combining a Google ADK agent and a stdio MCP server. The agent has exactly two graph tools:
 
-- `schema`: discovers and caches observed classes, predicates, datatypes, counts, and connections.
+- `schema`: discovers and caches observed classes, predicates, datatypes, counts, and connections; optional label search resolves entities and relations to observed IRIs.
 - `sparql`: executes validated read-only `SELECT`, `ASK`, `CONSTRUCT`, and `DESCRIBE` queries. Updates and federated `SERVICE` are rejected.
 
-Results are summarized from a bounded preview; each executed SPARQL query and its complete accepted JSON or Turtle result are saved as ADK artifacts.
+Results are summarized from a bounded preview; each executed SPARQL query and its complete accepted JSON or Turtle result are saved as ADK artifacts. The agent uses a compact plan–link–query workflow inspired by mKGQAgent: it resolves mentioned labels before composing SPARQL and may make one feedback-driven correction after an error or unexpectedly empty result. This keeps the quality benefits without a multi-agent pipeline or vector database.
 
 ## Run the demo
 
@@ -57,6 +57,10 @@ The directory is searched recursively for Turtle, N-Triples, RDF/XML, JSON-LD, N
 Set `SPARQL_ENDPOINT` to an HTTP(S) query endpoint. Basic authentication uses `SPARQL_USERNAME` and `SPARQL_PASSWORD`; bearer authentication uses `SPARQL_BEARER_TOKEN` and takes precedence.
 
 See [`environment.example`](environment.example) for all settings. `SYSTEM_PROMPT`, when set, replaces the built-in instruction. LiteLLM model identifiers are accepted in `LLM_MODEL`; `LLM_API_KEY` is passed directly to LiteLLM.
+
+## Research attribution
+
+The agent workflow is an independent, lightweight adaptation of ideas from Perevalov and Both's mKGQAgent paper. No mKGQAgent software is included or used. See [`NOTICE.md`](NOTICE.md) for the full citation and scope of the attribution.
 
 ## Local development
 
