@@ -6,6 +6,15 @@ on:
       - main
     tags:
       - "**"
+    # Path filters apply to branch pushes; GitHub does not evaluate them for tags.
+    # This keeps main builds limited to files used by the Docker build while every
+    # tag still publishes an image.
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - pyproject.toml
+      - sparql_agent/**
+      - demo/**
 
 permissions:
   contents: read

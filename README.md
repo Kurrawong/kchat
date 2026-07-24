@@ -1,27 +1,60 @@
-# Generic SPARQL ADK agent
+# kchat: natural-language chat for SPARQL
 
-kchat is an API-first example of serving a Google Agent Development Kit (ADK) agent and building a custom chat experience on top of the standard ADK API. Its primary purpose is to provide a reusable SPARQL agent service that can be called by the bundled web client, another application, or any custom interface that implements the ADK session and run flow.
+kchat is a bolt-on SPARQL agent. Point it at any SPARQL endpoint to add natural-language search and chat without changing the endpoint or the data behind it. People can ask questions in plain English, and kchat explores the graph, writes a read-only SPARQL query, runs it, and explains the results.
 
-The single container combines the ADK API application, a Google ADK agent, and a stdio MCP server. The agent has exactly two graph tools:
+It runs as a single container with a ready-to-use web chat and an API for connecting your own application, interface, or embedded widget. It can also load local RDF files, so you can try it without running a separate SPARQL service.
 
-- `schema`: discovers and caches observed classes, predicates, datatypes, counts, and connections; optional label search resolves entities and relations to observed IRIs.
-- `sparql`: executes validated read-only `SELECT`, `ASK`, `CONSTRUCT`, and `DESCRIBE` queries. Updates and federated `SERVICE` are rejected.
+The agent uses two focused tools:
 
-Results are summarized from a bounded preview; each executed SPARQL query and its complete accepted JSON or Turtle result are saved as ADK artifacts. The agent uses a compact plan–link–query workflow inspired by mKGQAgent: it resolves mentioned labels before composing SPARQL and may make one feedback-driven correction after an error or unexpectedly empty result. This keeps the quality benefits without a multi-agent pipeline or vector database.
+- `schema` learns how the graph is structured and matches names in a question to classes, properties, and resources in the data.
+- `sparql` runs safe, read-only `SELECT`, `ASK`, `CONSTRUCT`, and `DESCRIBE` queries. It blocks updates and federated `SERVICE` queries.
 
-## Purpose and architecture
+Every generated query and its complete result are saved as downloadable artifacts, while the chat response gives a readable summary. If a query fails or returns nothing, the agent can inspect the feedback and try one correction.
 
-The ADK API is the core application boundary. kchat starts ADK's FastAPI application with its normal session, execution, artifact, app-discovery, and OpenAPI routes intact. This makes the agent usable as a backend independently of the included interface; clients are not required to import the Python agent package or communicate with the MCP server directly.
+## How it fits into an application
 
-The bundled interface is a reference implementation of a custom ADK client. It is plain HTML, CSS, and JavaScript mounted at `/` after the ADK routes so it does not replace or hide them. The browser:
+kchat is a standalone backend service with an optional interface. The service manages conversations, runs the SPARQL agent, streams responses, and stores the generated queries and results. Applications communicate with it over HTTP, so they do not need to include the agent code or connect to its internal tools.
 
-1. creates or resumes a conversation through the ADK session endpoint;
-2. sends messages to `/run_sse` and renders streamed response events;
-3. reads ADK usage metadata to display input, output, and context-window token usage;
-4. lists and retrieves ADK artifacts to expose the exact SPARQL and complete query result; and
-5. reads non-secret model and graph information from the small `/kchat-config` endpoint.
+The bundled chat widget is a working example rather than a required part of the service. It can be replaced with a full-page application, embedded widget, command-line client, or another service. A custom client follows the same basic flow:
 
-This separation is intentional: the SPARQL agent and its artifacts form the reusable service, while the chat widget demonstrates how a product-specific interface can be layered over ADK. The UI can be replaced by a full-page application, embedded widget, command-line client, or another service while retaining the same agent API and behavior.
+1. create or resume a conversation;
+2. submit a message and render the streamed response;
+3. read usage information if token reporting is useful; and
+4. list and retrieve query and result artifacts for inspection or download.
+
+The app name is `sparql_agent`. Custom clients use this name when creating sessions and submitting runs through the session, `/run` or `/run_sse`, and artifact routes.
+
+### Runtime configuration for custom interfaces
+
+`GET /kchat-config` is the small piece of server-side integration provided for chat interfaces. It gives a browser or other client non-secret, display-ready information about the running kchat instance:
+
+```json
+{
+  "model": "mistral/mistral-small-latest",
+  "contextWindowTokens": 128000,
+  "sparqlEndpoint": "https://example.com/sparql",
+  "sparqlEndpointType": "Remote SPARQL endpoint"
+}
+```
+
+- `model` identifies the configured language model.
+- `contextWindowTokens` is the configured or detected context limit and may be `null` when it is unknown.
+- `sparqlEndpoint` identifies the graph being queried.
+- `sparqlEndpointType` is either `Remote SPARQL endpoint` or `Local RDF directory`.
+
+This lets a reusable widget discover what it is connected to instead of hard-coding deployment details. The bundled interface uses it to show the endpoint and calculate context-window usage. It deliberately excludes API keys, graph credentials, and the system prompt. Custom widgets can consume the same route even when the bundled interface is not used.
+
+The only other web integration is serving the bundled static interface at `/`. API and documentation routes take precedence, so mounting the example interface does not hide them. See [`sparql_agent/web.py`](sparql_agent/web.py) for the configuration route and static mount, and [`sparql_agent/ui/app.js`](sparql_agent/ui/app.js) for a complete browser client example.
+
+## Technology stack
+
+- **Agent and API:** Google Agent Development Kit (ADK) for conversations, streaming runs, usage metadata, and artifacts.
+- **Web server:** Python and FastAPI.
+- **Model access:** LiteLLM, allowing kchat to use supported models from different providers.
+- **Graph tools:** a local MCP tool server for schema discovery and read-only querying.
+- **Local RDF:** RDFLib for parsing and Oxigraph for the in-memory graph store.
+- **Demo interface:** plain HTML, CSS, and JavaScript with no frontend framework.
+- **Deployment:** a single Docker image; uv and Docker Compose are included in the development workflow.
 
 ## Screenshots
 
@@ -45,9 +78,9 @@ docker run --rm -p 8000:8000 \
   ghcr.io/kurrawong/kchat:latest
 ```
 
-Open `http://localhost:8000/` for the bundled kchat UI or `http://localhost:8000/docs` for the interactive ADK API documentation. Standard ADK `/list-apps`, `/run`, `/run_sse`, session, and artifact routes remain available. The ADK app name is `sparql_agent`; custom clients must use that name when creating sessions and submitting runs.
+Open `http://localhost:8000/` for the bundled kchat UI or `http://localhost:8000/docs` for interactive API documentation.
 
-The bottom-right chat widget renders Markdown, reports input/output/context token usage, and shows the executed SPARQL query and returned JSON or Turtle result as inline pills. Click a pill to inspect or download its complete contents in a movable window. Browser client behavior is implemented in [`sparql_agent/ui/app.js`](sparql_agent/ui/app.js), and the small amount of server-side integration is in [`sparql_agent/web.py`](sparql_agent/web.py).
+The bottom-right chat widget renders Markdown, reports input/output/context token usage, and shows the executed SPARQL query and returned JSON or Turtle result as inline pills. Click a pill to inspect or download its complete contents in a movable window.
 
 ## Docker Compose development
 
@@ -63,7 +96,7 @@ For live development, use Compose Watch:
 docker compose watch
 ```
 
-Changes under `sparql_agent/` are synchronized into the running container and reloaded by ADK. Demo RDF changes restart the service so the in-memory store is rebuilt; dependency or Dockerfile changes rebuild the image.
+Changes under `sparql_agent/` are synchronized into the running container and reloaded automatically. Demo RDF changes restart the service so the in-memory store is rebuilt; dependency or Dockerfile changes rebuild the image.
 
 ## Use mounted RDF
 
@@ -76,7 +109,7 @@ docker run --rm -p 8000:8000 \
   ghcr.io/kurrawong/kchat:latest
 ```
 
-The directory is searched recursively for Turtle, N-Triples, RDF/XML, JSON-LD, N3, TriG, and N-Quads. RDFLib parses and normalizes the files into a process-local, in-memory Oxigraph store. If `SPARQL_ENDPOINT` is omitted, the included `/demo` graph is used.
+The directory is searched recursively for Turtle, N-Triples, RDF/XML, JSON-LD, N3, TriG, and N-Quads, then loaded into an in-memory graph. If `SPARQL_ENDPOINT` is omitted, the included `/demo` graph is used.
 
 ## Use a remote endpoint
 
