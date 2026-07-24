@@ -21,6 +21,22 @@ Every generated query and its complete result are saved as downloadable artifact
 
 ![kchat's artifact viewer showing the generated SPARQL query](docs/images/kchat-artifact.png)
 
+## Run the demo
+
+The published image is available from the [GitHub Container Registry](https://github.com/Kurrawong/kchat/pkgs/container/kchat).
+
+```bash
+docker pull ghcr.io/kurrawong/kchat:latest
+docker run --rm -p 8000:8000 \
+  -e LLM_MODEL=mistral/mistral-small-latest \
+  -e LLM_API_KEY="$MISTRAL_API_KEY" \
+  ghcr.io/kurrawong/kchat:latest
+```
+
+Open `http://localhost:8000/` for the bundled kchat UI or `http://localhost:8000/docs` for interactive API documentation.
+
+The bottom-right chat widget renders Markdown, reports input/output/context token usage, and shows the executed SPARQL query and returned JSON or Turtle result as inline pills. Click a pill to inspect or download its complete contents in a movable window.
+
 ## How it fits into an application
 
 kchat is a standalone backend service with an optional interface. The service manages conversations, runs the SPARQL agent, streams responses, and stores the generated queries and results. Applications communicate with it over HTTP, so they do not need to include the agent code or connect to its internal tools.
@@ -65,22 +81,6 @@ The only other web integration is serving the bundled static interface at `/`. A
 - **Local RDF:** RDFLib for parsing and Oxigraph for the in-memory graph store.
 - **Demo interface:** plain HTML, CSS, and JavaScript with no frontend framework.
 - **Deployment:** a single Docker image; uv and Docker Compose are included in the development workflow.
-
-## Run the demo
-
-The published image is available from the [GitHub Container Registry](https://github.com/Kurrawong/kchat/pkgs/container/kchat).
-
-```bash
-docker pull ghcr.io/kurrawong/kchat:latest
-docker run --rm -p 8000:8000 \
-  -e LLM_MODEL=mistral/mistral-small-latest \
-  -e LLM_API_KEY="$MISTRAL_API_KEY" \
-  ghcr.io/kurrawong/kchat:latest
-```
-
-Open `http://localhost:8000/` for the bundled kchat UI or `http://localhost:8000/docs` for interactive API documentation.
-
-The bottom-right chat widget renders Markdown, reports input/output/context token usage, and shows the executed SPARQL query and returned JSON or Turtle result as inline pills. Click a pill to inspect or download its complete contents in a movable window.
 
 ## Docker Compose development
 
