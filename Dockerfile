@@ -1,4 +1,15 @@
-FROM python:3.12-slim
+FROM python:3.14.6-alpine AS dependencies
+
+WORKDIR /app
+COPY pyproject.toml ./
+
+# LiteLLM does not publish a musl wheel, so compile it in a disposable stage.
+RUN apk add --no-cache build-base cargo \
+    && python -c 'import subprocess, sys, tomllib; dependencies = tomllib.load(open("pyproject.toml", "rb"))["project"]["dependencies"]; subprocess.check_call([sys.executable, "-m", "pip", "install", "--prefix=/install", "--no-cache-dir", "--no-compile", *dependencies])' \
+    && site_packages="$(find /install/lib -type d -name site-packages -print -quit)" \
+    && find "$site_packages" -type d \( -name __pycache__ -o -name tests \) -prune -exec rm -rf '{}' +
+
+FROM python:3.14.6-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -8,13 +19,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Keep third-party dependencies in a layer that application and documentation
-# changes do not invalidate.
-COPY pyproject.toml ./
-RUN python -c 'import subprocess, sys, tomllib; dependencies = tomllib.load(open("pyproject.toml", "rb"))["project"]["dependencies"]; subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", *dependencies])'
-
-# The application runs directly from /app, so installing the local package is
-# unnecessary. Source changes now only invalidate these inexpensive copy layers.
+COPY --from=dependencies /install /usr/local
 COPY sparql_agent ./sparql_agent
 COPY demo /demo
 
