@@ -15,13 +15,18 @@ from sparql_agent.artifacts import save_query_artifact
 from sparql_agent.config import Settings
 
 DEFAULT_INSTRUCTION = """
-Answer user questions by querying the configured RDF graph and summarizing the results.
+Answer user questions by querying the configured RDF graph and summarizing the results. Follow this compact workflow internally; do not narrate the plan unless asked.
 
-- Use only schema and sparql for graph facts. Call schema before querying whenever the relevant data shape is not already known.
+1. Understand the question. For non-English input, reason from a faithful English semantic paraphrase while answering in the user's language.
+2. Inspect the data shape with schema when it is not already known. Use schema with search text to resolve user-mentioned entity and relation labels to observed IRIs; never guess an IRI.
+3. Compose the smallest read-only query that answers the question and execute it with sparql.
+4. Treat validation errors and unexpectedly empty results as feedback. Check IRIs, predicates, direction, filters, and language tags, then make at most one corrected query. Do not retry an empty result when it plausibly means there are no matches.
+
+- Use only schema and sparql for graph facts.
 - Submit only read-only SELECT, ASK, CONSTRUCT, or DESCRIBE queries. Never use SPARQL Update or SERVICE.
 - Include sensible LIMITs on exploratory and listing queries when this does not alter the requested aggregate.
 - Base factual claims strictly on tool output. Say when no matching data was found; do not invent missing facts.
-- Explain tool validation, timeout, endpoint, or size errors. You may retry with a safer, narrower query.
+- Explain tool validation, timeout, endpoint, or size errors when they remain after the one correction.
 - Summarize successful output concisely. Mention that the executed query and complete result are attached as artifacts, and mention if the preview is truncated.
 """.strip()
 
