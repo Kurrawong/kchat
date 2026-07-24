@@ -16,10 +16,17 @@
   let artifactFilename = "artifact.txt";
   let totals = { input: 0, output: 0 };
   let contextWindowTokens = 0;
+  const endpointInfo = $("#endpoint-info");
+  const endpointInfoButton = $("#endpoint-info-button");
 
+  function toggleEndpointInfo(open) {
+    endpointInfo.hidden = !open;
+    endpointInfoButton.setAttribute("aria-expanded", String(open));
+  }
   function toggleChat(open) {
     widget.classList.toggle("closed", !open);
     launcher.style.display = open ? "none" : "grid";
+    if (!open) toggleEndpointInfo(false);
     if (open) setTimeout(() => input.focus(), 150);
   }
   function toggleChatSize() {
@@ -31,6 +38,16 @@
   }
   $("#chat-size").onclick = toggleChatSize;
   $("#chat-close").onclick = () => toggleChat(false);
+  endpointInfoButton.onclick = () => toggleEndpointInfo(endpointInfo.hidden);
+  document.addEventListener("click", event => {
+    if (!endpointInfo.hidden && !endpointInfo.contains(event.target) && event.target !== endpointInfoButton) toggleEndpointInfo(false);
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !endpointInfo.hidden) {
+      toggleEndpointInfo(false);
+      endpointInfoButton.focus();
+    }
+  });
   launcher.onclick = () => toggleChat(true);
   $("#hero-chat").onclick = () => toggleChat(true);
 
@@ -198,8 +215,12 @@
       const config = await response.json();
       const limit = Number(config.contextWindowTokens);
       if (Number.isFinite(limit) && limit > 0) contextWindowTokens = limit;
+      $("#endpoint-type").textContent = config.sparqlEndpointType || "SPARQL endpoint";
+      $("#endpoint-value").textContent = config.sparqlEndpoint || "Unavailable";
     } catch {
       // Token counts remain available when model metadata cannot be loaded.
+      $("#endpoint-type").textContent = "Unavailable";
+      $("#endpoint-value").textContent = "Could not load configuration";
     } finally {
       renderUsage();
     }

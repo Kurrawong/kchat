@@ -24,11 +24,16 @@ app = get_fast_api_app(
 
 @app.get("/kchat-config")
 async def kchat_config() -> dict[str, int | str | None]:
-    """Expose non-secret model limits needed by the chat usage display."""
+    """Expose non-secret model and graph details needed by the chat UI."""
     settings = Settings.from_env()
     model_info = model_cost.get(settings.model, {})
     context_window = settings.context_window_tokens or model_info.get("max_input_tokens") or model_info.get("max_tokens")
-    return {"model": settings.model, "contextWindowTokens": context_window}
+    return {
+        "model": settings.model,
+        "contextWindowTokens": context_window,
+        "sparqlEndpoint": settings.sparql_endpoint,
+        "sparqlEndpointType": "Local RDF directory" if settings.is_local else "Remote SPARQL endpoint",
+    }
 
 
 # Added last so all ADK API and documentation routes retain precedence.

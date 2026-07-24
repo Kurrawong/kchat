@@ -176,6 +176,37 @@ h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: -2px;
 .chat-controls button, .artifact-window header button { border: 0; background: transparent; color: inherit; font-size: 22px; cursor: pointer; }
 .chat-controls button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border-radius: 4px; }
 .chat-controls button:hover { background: #ffffff1a; color: var(--yellow); }
+.chat-controls .info-button {
+  width: 27px;
+  height: 27px;
+  margin-right: 3px;
+  border: 1px solid #ffffff99;
+  border-radius: 50%;
+  font: 700 15px/1 Georgia, serif;
+}
+.chat-controls .info-button[aria-expanded="true"] { border-color: var(--yellow); background: #ffffff1a; color: var(--yellow); }
+.endpoint-info {
+  position: absolute;
+  z-index: 5;
+  top: 62px;
+  right: 12px;
+  width: min(340px, calc(100% - 24px));
+  padding: 13px 14px;
+  border: 1px solid #a1a1aa;
+  border-top: 3px solid var(--yellow);
+  border-radius: 5px;
+  background: white;
+  box-shadow: 0 8px 22px #00000029;
+  color: var(--ink);
+  font-size: 12px;
+}
+.endpoint-info[hidden] { display: none; }
+.endpoint-info > strong { font-size: 13px; }
+.endpoint-info dl { margin: 8px 0 0; }
+.endpoint-info dl div { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 8px; margin-top: 6px; }
+.endpoint-info dt { color: var(--muted); font-weight: 700; }
+.endpoint-info dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.endpoint-info code { font-size: 11px; }
 .artifact-window header button { margin-left: auto; font-size: 25px; }
 .token-status {
   min-height: 48px;

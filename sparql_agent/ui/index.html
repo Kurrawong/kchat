@@ -71,10 +71,19 @@ LLM_MODEL=mistral/mistral-small-latest</code></pre>
     <header class="chat-header">
       <div class="mini-logo"><img src="/kai.png" alt=""></div><div><strong>kchat</strong><small><i></i> graph assistant</small></div>
       <div class="chat-controls">
+        <button id="endpoint-info-button" class="info-button" aria-label="SPARQL endpoint information" aria-controls="endpoint-info" aria-expanded="false" title="SPARQL endpoint information">i</button>
         <button id="chat-size" aria-label="Maximize chat" title="Maximize chat">⛶</button>
         <button id="chat-close" aria-label="Close chat" title="Close chat">×</button>
       </div>
     </header>
+    <section id="endpoint-info" class="endpoint-info" aria-label="SPARQL endpoint details" hidden>
+      <strong>Graph connection</strong>
+      <dl>
+        <div><dt>Type</dt><dd id="endpoint-type">Loading…</dd></div>
+        <div><dt>Endpoint</dt><dd><code id="endpoint-value">Loading…</code></dd></div>
+        <div><dt>Access</dt><dd>Read-only queries</dd></div>
+      </dl>
+    </section>
     <div id="token-status" class="token-status">
       <span>IN <b id="input-tokens">0</b></span>
       <span>OUT <b id="output-tokens">0</b></span>

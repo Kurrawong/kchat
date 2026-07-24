@@ -31,6 +31,16 @@ Answer user questions by querying the configured RDF graph and summarizing the r
 """.strip()
 
 
+def system_instruction(settings: Settings) -> str:
+    """Build the agent instruction with explicit connection context."""
+    endpoint_kind = "local RDF directory" if settings.is_local else "remote HTTP SPARQL endpoint"
+    endpoint_context = (
+        f"Configured graph connection: {settings.sparql_endpoint!r} ({endpoint_kind}). "
+        "This is the endpoint used by the graph tools; do not attempt to access it except through schema and sparql."
+    )
+    return f"{settings.system_prompt or DEFAULT_INSTRUCTION}\n\n{endpoint_context}"
+
+
 def create_toolset() -> McpToolset:
     project_root = Path(__file__).resolve().parent.parent
     return McpToolset(connection_params=StdioConnectionParams(server_params=StdioServerParameters(command=sys.executable, args=["-m", "sparql_agent.mcp_server"], cwd=project_root, env=dict(os.environ)), timeout=30), tool_filter=["schema", "sparql"])
@@ -41,7 +51,7 @@ def create_agent(settings: Settings | None = None, toolset=None) -> LlmAgent:
     model_args = {"model": active.model}
     if active.api_key:
         model_args["api_key"] = active.api_key
-    return LlmAgent(name="sparql_query_agent", description="Runs read-only SPARQL and summarizes RDF graph results.", model=LiteLlm(**model_args), instruction=active.system_prompt or DEFAULT_INSTRUCTION, tools=[toolset or create_toolset()], after_tool_callback=save_query_artifact)
+    return LlmAgent(name="sparql_query_agent", description="Runs read-only SPARQL and summarizes RDF graph results.", model=LiteLlm(**model_args), instruction=system_instruction(active), tools=[toolset or create_toolset()], after_tool_callback=save_query_artifact)
 
 
 root_agent = create_agent()
