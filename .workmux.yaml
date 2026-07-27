@@ -1,0 +1,4 @@
+# workmux project configuration
+files:
+  copy:
+    - .env
