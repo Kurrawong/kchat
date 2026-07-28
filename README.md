@@ -77,7 +77,7 @@ The only other web integration is serving the bundled static interface at `/`. A
 - **Agent and API:** Google Agent Development Kit (ADK) for conversations, streaming runs, usage metadata, and artifacts.
 - **Web server:** Python and FastAPI.
 - **Model access:** LiteLLM, allowing kchat to use supported models from different providers.
-- **Graph tools:** a local MCP tool server for schema discovery and read-only querying.
+- **Graph tools:** native in-process ADK function tools for schema discovery and read-only querying.
 - **Local RDF:** RDFLib for parsing and Oxigraph for the in-memory graph store.
 - **Demo interface:** plain HTML, CSS, and JavaScript with no frontend framework.
 - **Deployment:** a single Docker image; uv and Docker Compose are included in the development workflow.

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from google.adk.agents.context import Context
@@ -13,8 +12,7 @@ from google.genai import types
 async def save_query_artifact(tool: BaseTool, args: dict[str, Any], tool_context: Context, tool_response: dict[str, Any]) -> dict[str, Any] | None:
     if tool.name != "sparql":
         return None
-    wrapped = isinstance(tool_response.get("structuredContent"), dict)
-    result = tool_response["structuredContent"] if wrapped else tool_response
+    result = tool_response
     if not result.get("ok") or not isinstance(result.get("payload"), str):
         return None
     media_type = result.get("media_type")
@@ -41,9 +39,4 @@ async def save_query_artifact(tool: BaseTool, args: dict[str, Any], tool_context
     model_result["artifacts"] = artifacts
     # Retain the singular field for clients that only understand the result artifact.
     model_result["artifact"] = artifacts[1]
-    if not wrapped:
-        return model_result
-    response = dict(tool_response)
-    response["structuredContent"] = model_result
-    response["content"] = [{"type": "text", "text": json.dumps(model_result, indent=2)}]
-    return response
+    return model_result

@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 
 from rdflib import Literal
 
-from sparql_agent.mcp_server.query import QueryService
+from sparql_agent.query import QueryService
 
 PREFIXES = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

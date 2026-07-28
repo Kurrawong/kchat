@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-import sys
-
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
-from mcp import StdioServerParameters
+from google.adk.tools import BaseTool
 
 from sparql_agent.artifacts import save_query_artifact
 from sparql_agent.config import Settings
+from sparql_agent.tools import create_tools
 
 DEFAULT_INSTRUCTION = """
 Answer user questions by querying the configured RDF graph and summarizing the results. Follow this compact workflow internally; do not narrate the plan unless asked.
@@ -41,17 +37,12 @@ def system_instruction(settings: Settings) -> str:
     return f"{settings.system_prompt or DEFAULT_INSTRUCTION}\n\n{endpoint_context}"
 
 
-def create_toolset() -> McpToolset:
-    project_root = Path(__file__).resolve().parent.parent
-    return McpToolset(connection_params=StdioConnectionParams(server_params=StdioServerParameters(command=sys.executable, args=["-m", "sparql_agent.mcp_server"], cwd=project_root, env=dict(os.environ)), timeout=30), tool_filter=["schema", "sparql"])
-
-
-def create_agent(settings: Settings | None = None, toolset=None) -> LlmAgent:
+def create_agent(settings: Settings | None = None, tools: list[BaseTool] | None = None) -> LlmAgent:
     active = settings or Settings.from_env()
     model_args = {"model": active.model}
     if active.api_key:
         model_args["api_key"] = active.api_key
-    return LlmAgent(name="sparql_query_agent", description="Runs read-only SPARQL and summarizes RDF graph results.", model=LiteLlm(**model_args), instruction=system_instruction(active), tools=[toolset or create_toolset()], after_tool_callback=save_query_artifact)
+    return LlmAgent(name="sparql_query_agent", description="Runs read-only SPARQL and summarizes RDF graph results.", model=LiteLlm(**model_args), instruction=system_instruction(active), tools=tools or create_tools(active), after_tool_callback=save_query_artifact)
 
 
 root_agent = create_agent()
