@@ -1,10 +1,4 @@
-investigation:
+# Completed
 
-is MCP needed or can ADK provide the two tool calls natively?
-if so then refactor the code to remove the complexity of the MCP server.
-
-
-improvement:
-
-can we provide a way to persist sessions maybe by allowing a database connection string
-to use an alternative session backend.
+- Replaced the MCP server with native Google ADK `FunctionTool` integrations for schema discovery and read-only SPARQL queries.
+- Added configurable persistent sessions through `SESSION_DATABASE_URL`, with SQLite, PostgreSQL, and MySQL async backends.
