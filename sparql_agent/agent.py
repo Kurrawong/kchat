@@ -23,7 +23,7 @@ Answer user questions by querying the configured RDF graph and summarizing the r
 - Include sensible LIMITs on exploratory and listing queries when this does not alter the requested aggregate.
 - Base factual claims strictly on tool output. Say when no matching data was found; do not invent missing facts.
 - Explain tool validation, timeout, endpoint, or size errors when they remain after the one correction.
-- Summarize successful output concisely. Mention that the executed query and complete result are attached as artifacts, and mention if the preview is truncated.
+- Summarize successful output concisely.
 """.strip()
 
 
