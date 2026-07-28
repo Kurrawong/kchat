@@ -5,6 +5,34 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
+
+
+SUPPORTED_SESSION_DATABASE_SCHEMES = {
+    "sqlite",
+    "sqlite+aiosqlite",
+    "postgresql+asyncpg",
+    "mysql+aiomysql",
+}
+
+
+def validate_session_database_url(value: str | None) -> str | None:
+    """Validate an ADK/SQLAlchemy session database connection string."""
+    if not value:
+        return None
+    try:
+        parsed = urlsplit(value)
+    except ValueError as error:
+        raise ValueError("SESSION_DATABASE_URL is not a valid database URL") from error
+    if parsed.scheme.lower() not in SUPPORTED_SESSION_DATABASE_SCHEMES:
+        supported = ", ".join(sorted(SUPPORTED_SESSION_DATABASE_SCHEMES))
+        raise ValueError(f"SESSION_DATABASE_URL must use one of these schemes: {supported}")
+    if parsed.scheme.lower().startswith("sqlite"):
+        if not parsed.path:
+            raise ValueError("SESSION_DATABASE_URL must identify a SQLite database file")
+    elif not parsed.hostname or parsed.path in {"", "/"}:
+        raise ValueError("SESSION_DATABASE_URL must include a database host and name")
+    return value
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +50,7 @@ class Settings:
     context_window_tokens: int | None = None
     api_key: str | None = None
     system_prompt: str | None = None
+    session_database_url: str | None = None
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -41,6 +70,7 @@ class Settings:
             context_window_tokens=int(value) if (value := os.getenv("LLM_CONTEXT_WINDOW_TOKENS")) else None,
             api_key=os.getenv("LLM_API_KEY"),
             system_prompt=os.getenv("SYSTEM_PROMPT"),
+            session_database_url=validate_session_database_url(os.getenv("SESSION_DATABASE_URL")),
         )
 
     @property

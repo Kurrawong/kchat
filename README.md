@@ -117,6 +117,28 @@ Set `SPARQL_ENDPOINT` to an HTTP(S) query endpoint. Basic authentication uses `S
 
 See [`environment.example`](environment.example) for all settings. `SYSTEM_PROMPT`, when set, replaces the built-in instruction. LiteLLM model identifiers are accepted in `LLM_MODEL`; `LLM_API_KEY` is passed directly to LiteLLM.
 
+## Persist sessions
+
+By default, kchat preserves the existing ADK behavior: sessions use ADK's local per-agent SQLite storage. This survives process restarts when the application directory is persistent, but container filesystem contents are lost when a container is replaced.
+
+Set `SESSION_DATABASE_URL` to use ADK's database session service instead. kchat includes async drivers and validates connection strings for these schemes:
+
+- `sqlite:////data/kchat-sessions.db` or `sqlite+aiosqlite:////data/kchat-sessions.db`
+- `postgresql+asyncpg://user:password@database.example/kchat`
+- `mysql+aiomysql://user:password@database.example/kchat`
+
+For file-based SQLite in a container, mount the database's parent directory on persistent storage:
+
+```bash
+docker run --rm -p 8000:8000 \
+  -v kchat-data:/data \
+  -e SESSION_DATABASE_URL=sqlite:////data/kchat-sessions.db \
+  -e LLM_API_KEY="$MISTRAL_API_KEY" \
+  ghcr.io/kurrawong/kchat:latest
+```
+
+For multi-instance deployments, use PostgreSQL or MySQL rather than SQLite. The database account must be able to create and update ADK's session tables. Keep the connection string server-side because it commonly contains credentials; it is not returned by `/kchat-config`. This setting changes conversation/session storage only—query artifacts continue to use ADK's local artifact storage.
+
 ## Research attribution
 
 The agent workflow is an independent, lightweight adaptation of ideas from Perevalov and Both's mKGQAgent paper. No mKGQAgent software is included or used. See [`NOTICE.md`](NOTICE.md) for the full citation and scope of the attribution.

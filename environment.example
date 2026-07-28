@@ -6,6 +6,14 @@ LLM_CONTEXT_WINDOW_TOKENS=
 # Use LiteLLM's bundled cost/context map instead of fetching it at startup.
 LITELLM_LOCAL_MODEL_COST_MAP=true
 
+# Optional persistent session database. When omitted, ADK's existing local SQLite
+# storage is used. Supported schemes: sqlite, sqlite+aiosqlite,
+# postgresql+asyncpg, and mysql+aiomysql.
+# SESSION_DATABASE_URL=postgresql+asyncpg://kchat:password@database/kchat
+# For SQLite in a container, mount the parent directory as a persistent volume:
+# SESSION_DATABASE_URL=sqlite:////data/kchat-sessions.db
+SESSION_DATABASE_URL=
+
 # Omit to use the image's /demo RDF. Set an absolute mounted directory or URL.
 SPARQL_ENDPOINT=/rdf
 # Basic auth for a remote endpoint:
