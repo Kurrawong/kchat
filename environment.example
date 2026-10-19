@@ -28,3 +28,13 @@ SPARQL_PREVIEW_ITEMS=20
 
 # When set, this replaces the built-in agent instruction.
 SYSTEM_PROMPT=
+
+# Optional extra instructions appended after the built-in agent instruction
+# (or after SYSTEM_PROMPT when set). Use this to scope the agent to a site.
+AGENT_EXTRA_INSTRUCTIONS=
+
+# Optional per-user question rate limiting for /run and /run_sse.
+# RATE_LIMIT_QUESTIONS is the maximum per user per window; 0 or unset disables
+# the limit. RATE_LIMIT_WINDOW_SECONDS defaults to 3600 (1 hour).
+RATE_LIMIT_QUESTIONS=
+RATE_LIMIT_WINDOW_SECONDS=3600

@@ -50,7 +50,10 @@ class Settings:
     context_window_tokens: int | None = None
     api_key: str | None = None
     system_prompt: str | None = None
+    extra_instructions: str | None = None
     session_database_url: str | None = None
+    rate_limit_questions: int | None = None
+    rate_limit_window_seconds: float = 3600.0
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -70,7 +73,10 @@ class Settings:
             context_window_tokens=int(value) if (value := os.getenv("LLM_CONTEXT_WINDOW_TOKENS")) else None,
             api_key=os.getenv("LLM_API_KEY"),
             system_prompt=os.getenv("SYSTEM_PROMPT"),
+            extra_instructions=os.getenv("AGENT_EXTRA_INSTRUCTIONS") or None,
             session_database_url=validate_session_database_url(os.getenv("SESSION_DATABASE_URL")),
+            rate_limit_questions=int(value) if (value := os.getenv("RATE_LIMIT_QUESTIONS")) and int(value) > 0 else None,
+            rate_limit_window_seconds=float(os.getenv("RATE_LIMIT_WINDOW_SECONDS", defaults.rate_limit_window_seconds)),
         )
 
     @property

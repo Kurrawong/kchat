@@ -115,7 +115,7 @@ The directory is searched recursively for Turtle, N-Triples, RDF/XML, JSON-LD, N
 
 Set `SPARQL_ENDPOINT` to an HTTP(S) query endpoint. Basic authentication uses `SPARQL_USERNAME` and `SPARQL_PASSWORD`; bearer authentication uses `SPARQL_BEARER_TOKEN` and takes precedence.
 
-See [`environment.example`](environment.example) for all settings. `SYSTEM_PROMPT`, when set, replaces the built-in instruction. LiteLLM model identifiers are accepted in `LLM_MODEL`; `LLM_API_KEY` is passed directly to LiteLLM.
+See [`environment.example`](environment.example) for all settings. `SYSTEM_PROMPT`, when set, replaces the built-in instruction. `AGENT_EXTRA_INSTRUCTIONS` appends operator instructions after the built-in instruction (or after `SYSTEM_PROMPT` when set), which is useful for scoping the agent to a site, for example to refuse off-topic questions. `RATE_LIMIT_QUESTIONS` optionally limits each user to that many questions per `RATE_LIMIT_WINDOW_SECONDS` (default one hour); when set, `/run` and `/run_sse` return a friendly 429 once a user reaches the limit. LiteLLM model identifiers are accepted in `LLM_MODEL`; `LLM_API_KEY` is passed directly to LiteLLM.
 
 ## Persist sessions
 
