@@ -1,6 +1,6 @@
 [project]
 name = "kchat"
-version = "0.0.3"
+version = "0.0.4"
 description = "Containerized Google ADK agent with native read-only SPARQL tools"
 readme = "README.md"
 requires-python = ">=3.14,<4.0"
@@ -10,6 +10,7 @@ dependencies = [
   "google-adk>=2.5.0",
   "httpx>=0.28.1",
   "litellm>=1.93.0",
+  "mcp>=1.8.0",
   "pyoxigraph>=0.5.9",
   "rdflib>=7.6.0",
   "sqlalchemy>=2,<3",

@@ -34,7 +34,10 @@ def system_instruction(settings: Settings) -> str:
         f"Configured graph connection: {settings.sparql_endpoint!r} ({endpoint_kind}). "
         "This is the endpoint used by the graph tools; do not attempt to access it except through schema and sparql."
     )
-    return f"{settings.system_prompt or DEFAULT_INSTRUCTION}\n\n{endpoint_context}"
+    instruction = f"{settings.system_prompt or DEFAULT_INSTRUCTION}\n\n{endpoint_context}"
+    if settings.extra_instructions:
+        instruction = f"{instruction}\n\nAdditional operator instructions:\n{settings.extra_instructions}"
+    return instruction
 
 
 def create_agent(settings: Settings | None = None, tools: list[BaseTool] | None = None) -> LlmAgent:
